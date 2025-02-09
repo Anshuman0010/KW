@@ -17,26 +17,48 @@ const Nav = styled(motion.nav)`
 const NavContainer = styled.div`
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 3rem;
   display: flex;
   align-items: center;
   gap: 4rem;
 `;
 
-const Logo = styled(motion.div)`
-  font-size: 1.5rem;
-  font-weight: bold;
+const BrandContainer = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  text-decoration: none;
   color: white;
-  letter-spacing: 1px;
-  flex-shrink: 0;
+  margin-left: 1rem;
+`;
+
+const Logo = styled.img`
+  height: 65px;
+  width: 60px;
+  object-fit: contain;
+  border-radius: 8px;
+  transform: translateX(8px);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateX(8px) scale(1.02);
+  }
+`;
+
+const BrandName = styled.h1`
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0;
 `;
 
 const NavLinks = styled.div`
   display: flex;
   gap: 3rem;
   flex-grow: 1;
-  justify-content: center;
-
+  justify-content: flex-start;
+  margin-left: 2rem;
+  
   @media (max-width: 768px) {
     display: none;
   }
@@ -143,13 +165,12 @@ const Navbar = () => {
       transition={{ duration: 0.5 }}
     >
       <NavContainer>
-        <Logo
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          KIITWALLAH
-        </Logo>
+        <BrandContainer to="/">
+          <Logo 
+            src="https://res.cloudinary.com/dqt4zammn/image/upload/b_rgb:290846/c_crop,ar_1:1/v1739117879/KW_1_yeosmd.png" 
+            alt="KIITWALLAH Logo"
+          />
+        </BrandContainer>
         <NavLinks>
           {["Scholar's Archive", 'Career Elevate', 'Alumni Nexus', 'Affinity Circle'].map((item, index) => (
             <NavLink
