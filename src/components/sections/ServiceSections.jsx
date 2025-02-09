@@ -11,7 +11,7 @@ const Section = styled.div`
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 4rem;
+  gap: 2rem;
   position: relative;
   background: ${props => props.index % 2 === 0 ? 
     'linear-gradient(135deg, #2A0845 0%, #1B1464 100%)' : 
@@ -43,10 +43,16 @@ const Section = styled.div`
 const Content = styled.div`
   flex: 1;
   max-width: 600px;
-  margin: ${props => props.align === 'right' ? '0 0 0 auto' : '0'};
+  margin: ${props => props.align === 'right' ? '0 auto 0 0' : '0 0 0 auto'};
+  padding: ${props => props.align === 'right' ? '0 4rem 0 0' : '0 0 0 4rem'};
+
+  @media (max-width: 1200px) {
+    padding: ${props => props.align === 'right' ? '0 2rem 0 0' : '0 0 0 2rem'};
+  }
 
   @media (max-width: 968px) {
     margin: 0 auto;
+    padding: 0;
   }
 `;
 
@@ -62,7 +68,7 @@ const Visual = styled(motion.div)`
   justify-content: center;
   backdrop-filter: blur(10px);
   max-width: 600px;
-  margin: ${props => props.align === 'left' ? '0 0 0 auto' : '0'};
+  margin: ${props => props.align === 'left' ? '0 auto 0 0' : '0 0 0 auto'};
 
   @media (max-width: 968px) {
     margin: 0 auto;
