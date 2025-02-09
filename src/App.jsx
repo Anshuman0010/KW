@@ -13,6 +13,9 @@ import StudentHub from './pages/StudentHub';
 import MonthlyVisits from './pages/MonthlyVisits';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import CareerElevate from './pages/CareerElevate';
+import AlumniNexus from './pages/AlumniNexus';
+import ScholarArchive from './pages/ScholarArchive';
 
 function App() {
   const [isDark, setIsDark] = useState(() => {
@@ -46,6 +49,9 @@ function App() {
             <Route path="/student-hub" element={<StudentHub />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/career-elevate" element={<CareerElevate />} />
+            <Route path="/alumni-nexus" element={<AlumniNexus />} />
+            <Route path="/scholars-archive" element={<ScholarArchive />} />
           </Routes>
         </div>
       </Router>

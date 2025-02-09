@@ -172,17 +172,42 @@ const Navbar = () => {
           />
         </BrandContainer>
         <NavLinks>
-          {["Scholar's Archive", 'Career Elevate', 'Alumni Nexus', 'Affinity Circle'].map((item, index) => (
-            <NavLink
-              key={item}
-              href={`#${item.toLowerCase().replace(' ', '-')}`}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.3 }}
-            >
-              {item}
-            </NavLink>
-          ))}
+          <NavLink
+            as={Link}
+            to="/scholars-archive"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            Scholar's Archive
+          </NavLink>
+          <NavLink
+            as={Link}
+            to="/career-elevate"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            Career Elevate
+          </NavLink>
+          <NavLink
+            as={Link}
+            to="/alumni-nexus"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            Alumni Nexus
+          </NavLink>
+          <NavLink
+            as={Link}
+            to="/affinity-circle"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            Affinity Circle
+          </NavLink>
         </NavLinks>
         <AuthButtons>
           <AuthButton
