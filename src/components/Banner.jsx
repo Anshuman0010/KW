@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import styled, { css } from 'styled-components';
+import { useNavigate } from 'react-router-dom';
 import { FiBarChart2, FiBook, FiAward, FiUsers, FiMessageCircle, FiCode, FiCpu, FiDatabase, FiGlobe, FiServer, FiTerminal } from 'react-icons/fi';
 
 const StarryBackground = styled.div`
@@ -149,25 +150,67 @@ const FeatureItem = styled(motion.div)`
   padding: 1rem;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  border-left: 3px solid ${props => props.color};
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -100%;
+    width: 40px;
+    height: 200%;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent
+    );
+    transform: rotate(45deg);
+    transition: 0.5s;
+    opacity: 0;
+  }
+
+  &:hover::before {
+    left: 200%;
+    opacity: 0.8;
+    transition: 0.8s;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: ${props => props.color};
+    opacity: 0;
+    transition: 0.3s ease;
+  }
+
+  &:hover::after {
+    opacity: 0.1;
+  }
 
   &:hover {
     transform: translateX(-5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
   }
 
   .number {
     font-size: 0.9rem;
     color: ${props => props.color};
     font-weight: 600;
+    position: relative;
+    z-index: 1;
   }
 
   .content {
+    position: relative;
+    z-index: 1;
     h3 {
       color: white;
-      font-size: 1.1rem;
+      font-size: 1rem;
       margin-bottom: 0.2rem;
       display: flex;
       align-items: center;
@@ -175,14 +218,28 @@ const FeatureItem = styled(motion.div)`
 
       svg {
         color: ${props => props.color};
+        transition: transform 0.3s ease;
       }
     }
 
     p {
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.6);
       font-size: 0.9rem;
     }
   }
+
+  &:hover .content h3 svg {
+    transform: scale(1.2);
+  }
+`;
+
+const LightningPath = styled(motion.div)`
+  position: absolute;
+  width: 2px;
+  background: ${props => props.color};
+  opacity: 0;
+  filter: blur(1px);
+  pointer-events: none;
 `;
 
 const features = [
@@ -190,31 +247,36 @@ const features = [
     icon: FiBarChart2,
     title: 'Monthly Visits',
     description: 'Track our growing community.',
-    color: '#6C63FF'
+    color: '#6C63FF',
+    path: '/monthly-visits'
   },
   {
     icon: FiBook,
     title: 'Study Material',
     description: 'Access learning resources.',
-    color: '#4CAF50'
+    color: '#4CAF50',
+    path: '/learn-hub'
   },
   {
     icon: FiAward,
     title: 'Smart Selection',
     description: 'AI-powered recommendations.',
-    color: '#FF5722'
+    color: '#FF5722',
+    path: '/career-boost'
   },
   {
     icon: FiUsers,
     title: 'Faculty Directory',
     description: 'Connect with faculty.',
-    color: '#2196F3'
+    color: '#2196F3',
+    path: '/campus-careers'
   },
   {
     icon: FiMessageCircle,
     title: 'Community',
     description: 'Engage with fellow students.',
-    color: '#9C27B0'
+    color: '#9C27B0',
+    path: '/student-hub'
   }
 ];
 
@@ -308,6 +370,12 @@ const BannerContainer = styled.div`
 `;
 
 const Banner = () => {
+  const navigate = useNavigate();
+
+  const handleFeatureClick = (path) => {
+    navigate(path);
+  };
+
   return (
     <BannerContainer>
       <StarryBackground>
@@ -413,6 +481,9 @@ const Banner = () => {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover="hover"
+              onClick={() => handleFeatureClick(feature.path)}
+              whileTap={{ scale: 0.98 }}
             >
               <div className="number">0{index + 1}</div>
               <div className="content">
@@ -422,6 +493,38 @@ const Banner = () => {
                 </h3>
                 <p>{feature.description}</p>
               </div>
+              <LightningPath
+                color={feature.color}
+                variants={{
+                  hover: {
+                    opacity: [0, 1, 0],
+                    height: [0, 100, 0],
+                    top: [0, "100%"],
+                    transition: {
+                      duration: 0.5,
+                      repeat: Infinity,
+                      repeatType: "loop"
+                    }
+                  }
+                }}
+              />
+              <LightningPath
+                color={feature.color}
+                style={{ left: "60%" }}
+                variants={{
+                  hover: {
+                    opacity: [0, 1, 0],
+                    height: [0, 100, 0],
+                    top: [0, "100%"],
+                    transition: {
+                      duration: 0.5,
+                      delay: 0.2,
+                      repeat: Infinity,
+                      repeatType: "loop"
+                    }
+                  }
+                }}
+              />
             </FeatureItem>
           ))}
         </FeatureList>

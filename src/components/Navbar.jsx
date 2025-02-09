@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const Nav = styled(motion.nav)`
   position: fixed;
@@ -8,29 +9,33 @@ const Nav = styled(motion.nav)`
   top: 0;
   z-index: 100;
   padding: 1rem 0;
-  background: ${props => props.scrolled ? props.theme.colors.navBg : 'transparent'};
+  background: ${props => props.scrolled ? 'rgba(42, 8, 69, 0.85)' : 'transparent'};
   backdrop-filter: ${props => props.scrolled ? 'blur(10px)' : 'none'};
   transition: all 0.3s ease;
 `;
 
 const NavContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 4rem;
 `;
 
 const Logo = styled(motion.div)`
   font-size: 1.5rem;
   font-weight: bold;
   color: white;
+  letter-spacing: 1px;
+  flex-shrink: 0;
 `;
 
 const NavLinks = styled.div`
   display: flex;
-  gap: 2rem;
+  gap: 3rem;
+  flex-grow: 1;
+  justify-content: center;
 
   @media (max-width: 768px) {
     display: none;
@@ -40,22 +45,81 @@ const NavLinks = styled.div`
 const NavLink = styled(motion.a)`
   color: ${props => props.theme.colors.text};
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
   position: relative;
+  opacity: 0.9;
+  letter-spacing: 0.3px;
+  padding: 0.5rem 0;
 
   &::after {
     content: '';
     position: absolute;
     width: 0;
     height: 2px;
-    bottom: -4px;
-    left: 0;
-    background: white;
-    transition: width 0.3s ease;
+    bottom: 0;
+    left: 50%;
+    background: #6C63FF;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+  }
+
+  &:hover {
+    opacity: 1;
   }
 
   &:hover::after {
     width: 100%;
+  }
+`;
+
+const AuthButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
+`;
+
+const AuthButton = styled(motion.button)`
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &.login {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+  
+  &.signup {
+    background: #6C63FF;
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(108, 99, 255, 0.4);
+    }
+  }
+`;
+
+const MenuButton = styled(motion.button)`
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  
+  @media (max-width: 768px) {
+    display: block;
   }
 `;
 
@@ -87,7 +151,7 @@ const Navbar = () => {
           KIITWALLAH
         </Logo>
         <NavLinks>
-          {['Introduction', 'Digital Revolution', 'Timeline', 'Impacts', 'Case Study'].map((item, index) => (
+          {["Scholar's Archive", 'Career Elevate', 'Alumni Nexus', 'Affinity Circle'].map((item, index) => (
             <NavLink
               key={item}
               href={`#${item.toLowerCase().replace(' ', '-')}`}
@@ -99,6 +163,26 @@ const Navbar = () => {
             </NavLink>
           ))}
         </NavLinks>
+        <AuthButtons>
+          <AuthButton
+            className="login"
+            as={Link}
+            to="/login"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Login
+          </AuthButton>
+          <AuthButton
+            className="signup"
+            as={Link}
+            to="/signup"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Sign Up
+          </AuthButton>
+        </AuthButtons>
       </NavContainer>
     </Nav>
   );
