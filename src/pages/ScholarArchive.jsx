@@ -50,42 +50,34 @@ const Subtitle = styled.p`
 `;
 
 const FiltersSection = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  display: flex;
+  gap: 2rem;
   margin-bottom: 3rem;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 2rem;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
 `;
 
 const FilterGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+  flex: 1;
+  min-width: 200px;
 `;
 
 const FilterLabel = styled.label`
-  font-size: 0.9rem;
+  display: block;
+  margin-bottom: 0.8rem;
   color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
+  font-size: 0.9rem;
 `;
 
 const Select = styled.select`
-  padding: 0.8rem 1rem;
+  width: 100%;
+  padding: 1rem;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 12px;
   color: white;
-  font-size: 0.9rem;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-
+  
   option {
     background: #2A0845;
     color: white;
@@ -95,31 +87,31 @@ const Select = styled.select`
 const ContentTypeToggle = styled.div`
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 `;
 
 const ToggleButton = styled(motion.button)`
-  padding: 0.8rem 2rem;
+  padding: 1rem 2rem;
   background: ${props => props.active ? 'rgba(108, 99, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)'};
   border: 1px solid ${props => props.active ? '#6C63FF' : 'rgba(255, 255, 255, 0.2)'};
-  border-radius: 8px;
+  border-radius: 12px;
   color: white;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.8rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 
   svg {
     font-size: 1.2rem;
   }
 `;
 
-const ResourcesGrid = styled.div`
+const ResourceGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
   padding-bottom: 2rem;
 `;
 
@@ -134,6 +126,7 @@ const ResourceCard = styled(motion.div)`
 
   &:hover {
     transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -145,33 +138,29 @@ const ResourceHeader = styled.div`
 `;
 
 const ResourceTitle = styled.h3`
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   color: white;
 `;
 
 const ResourceMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.85rem;
-  margin-top: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 `;
 
 const DownloadButton = styled(motion.button)`
   width: 100%;
-  padding: 0.8rem;
+  padding: 1rem;
   background: linear-gradient(45deg, #6C63FF, #2A0845);
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   color: white;
-  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   cursor: pointer;
-  margin-top: 1rem;
+  font-weight: 600;
 `;
 
 const ScholarArchive = () => {
@@ -195,14 +184,17 @@ const ScholarArchive = () => {
       <ContentWrapper>
         <Header>
           <Title>Scholar's Archive</Title>
-          <Subtitle>Access study materials, notes, and previous year questions for all branches and semesters.</Subtitle>
+          <Subtitle>Access study materials and previous year questions for all branches and semesters</Subtitle>
         </Header>
 
         <FiltersSection>
           <FilterGroup>
             <FilterLabel>Branch</FilterLabel>
-            <Select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
-              <option value="">All Branches</option>
+            <Select 
+              value={selectedBranch} 
+              onChange={(e) => setSelectedBranch(e.target.value)}
+            >
+              <option value="">Select Branch</option>
               {branches.map(branch => (
                 <option key={branch} value={branch}>{branch}</option>
               ))}
@@ -211,8 +203,11 @@ const ScholarArchive = () => {
 
           <FilterGroup>
             <FilterLabel>Semester</FilterLabel>
-            <Select value={selectedSemester} onChange={(e) => setSelectedSemester(e.target.value)}>
-              <option value="">All Semesters</option>
+            <Select 
+              value={selectedSemester} 
+              onChange={(e) => setSelectedSemester(e.target.value)}
+            >
+              <option value="">Select Semester</option>
               {semesters.map(sem => (
                 <option key={sem} value={sem}>Semester {sem}</option>
               ))}
@@ -241,7 +236,7 @@ const ScholarArchive = () => {
           </ToggleButton>
         </ContentTypeToggle>
 
-        <ResourcesGrid>
+        <ResourceGrid>
           {[1, 2, 3, 4, 5, 6].map((_, index) => (
             <ResourceCard
               key={index}
@@ -251,12 +246,11 @@ const ScholarArchive = () => {
             >
               <ResourceHeader>
                 <ResourceTitle>
-                  {contentType === 'notes' ? 'Data Structures Notes' : 'Data Structures 2022 Question Paper'}
+                  {contentType === 'notes' ? 'Data Structures Notes' : 'Data Structures 2023 Question Paper'}
                 </ResourceTitle>
               </ResourceHeader>
               <ResourceMeta>
-                <span>Semester 3</span>
-                <span>Computer Science</span>
+                Computer Science • Semester 3
               </ResourceMeta>
               <DownloadButton
                 whileHover={{ scale: 1.02 }}
@@ -267,7 +261,7 @@ const ScholarArchive = () => {
               </DownloadButton>
             </ResourceCard>
           ))}
-        </ResourcesGrid>
+        </ResourceGrid>
       </ContentWrapper>
     </PageContainer>
   );
