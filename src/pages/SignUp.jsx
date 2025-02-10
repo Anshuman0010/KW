@@ -273,6 +273,13 @@ const VerificationStatus = styled(motion.div)`
   border: ${props => props.$isVerified ? '1px solid rgba(76, 175, 80, 0.2)' : 'none'};
 `;
 
+const ErrorMessage = styled.span`
+  color: #ff6b6b;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+`;
+
 const SignUp = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -283,9 +290,51 @@ const SignUp = () => {
     password: '',
     confirmPassword: ''
   });
+  const [formErrors, setFormErrors] = useState({
+    name: '',
+    rollNumber: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+
+  // Check if form is valid for email verification
+  const canVerifyEmail = () => {
+    return (
+      formData.name.trim().length >= 3 &&
+      formData.rollNumber.trim().length >= 5 &&
+      formData.password.length >= 6 &&
+      formData.password === formData.confirmPassword
+    );
+  };
+
+  // Validate form fields
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'name':
+        return value.trim().length < 3 ? 'Name must be at least 3 characters' : '';
+      case 'rollNumber':
+        return value.trim().length < 5 ? 'Roll number must be at least 5 characters' : '';
+      case 'password':
+        return value.length < 6 ? 'Password must be at least 6 characters' : '';
+      case 'confirmPassword':
+        return value !== formData.password ? 'Passwords do not match' : '';
+      default:
+        return '';
+    }
+  };
+
+  // Handle input changes with validation
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: validateField(name, value)
+    }));
+  };
 
   useEffect(() => {
     // Clear any existing phoneEmailReceiver
@@ -296,6 +345,21 @@ const SignUp = () => {
     script.src = 'https://www.phone.email/verify_email_v1.js';
     script.async = true;
     document.body.appendChild(script);
+
+    // Hide the email verification button if form is not valid
+    const observer = new MutationObserver(() => {
+      const verifyButton = document.querySelector('.pe_verify_email button');
+      if (verifyButton) {
+        verifyButton.disabled = !canVerifyEmail();
+        verifyButton.style.opacity = canVerifyEmail() ? '1' : '0.5';
+        verifyButton.style.cursor = canVerifyEmail() ? 'pointer' : 'not-allowed';
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
 
     // Function to receive verified email JSON URL
     window.phoneEmailReceiver = (userObj) => {
@@ -344,8 +408,9 @@ const SignUp = () => {
         script.parentNode.removeChild(script);
       }
       delete window.phoneEmailReceiver;
+      observer.disconnect();
     };
-  }, [isVerifying]);
+  }, [isVerifying, formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -399,29 +464,41 @@ const SignUp = () => {
             <InputGroup>
               <Input 
                 type="text" 
+                name="name"
                 placeholder="Full Name" 
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={handleInputChange}
                 required 
               />
+              {formErrors.name && (
+                <ErrorMessage>{formErrors.name}</ErrorMessage>
+              )}
             </InputGroup>
             <InputGroup>
               <Input 
                 type="text" 
+                name="rollNumber"
                 placeholder="Roll Number" 
                 value={formData.rollNumber}
-                onChange={(e) => setFormData({...formData, rollNumber: e.target.value})}
+                onChange={handleInputChange}
                 required 
               />
+              {formErrors.rollNumber && (
+                <ErrorMessage>{formErrors.rollNumber}</ErrorMessage>
+              )}
             </InputGroup>
             <InputGroup>
               <Input 
                 type={showPassword ? "text" : "password"}
+                name="password"
                 placeholder="Password" 
                 value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                onChange={handleInputChange}
                 required
               />
+              {formErrors.password && (
+                <ErrorMessage>{formErrors.password}</ErrorMessage>
+              )}
               <PasswordToggle
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -433,11 +510,15 @@ const SignUp = () => {
             <InputGroup>
               <Input 
                 type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
                 placeholder="Confirm Password" 
                 value={formData.confirmPassword}
-                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                onChange={handleInputChange}
                 required
               />
+              {formErrors.confirmPassword && (
+                <ErrorMessage>{formErrors.confirmPassword}</ErrorMessage>
+              )}
               <PasswordToggle
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -449,7 +530,10 @@ const SignUp = () => {
 
             <VerifyEmailSection>
               <EmailVerifyText>
-                Verify your email address to continue
+                {canVerifyEmail() 
+                  ? 'Verify your email address to continue' 
+                  : 'Please fill in all fields correctly to verify email'
+                }
               </EmailVerifyText>
               <div 
                 className="pe_verify_email" 
