@@ -16,6 +16,8 @@ import SignUp from './pages/SignUp';
 import CareerElevate from './pages/CareerElevate';
 import AlumniNexus from './pages/AlumniNexus';
 import ScholarArchive from './pages/ScholarArchive';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const [isDark, setIsDark] = useState(() => {
@@ -52,6 +54,10 @@ function App() {
             <Route path="/career-elevate" element={<CareerElevate />} />
             <Route path="/alumni-nexus" element={<AlumniNexus />} />
             <Route path="/scholars-archive" element={<ScholarArchive />} />
+            <Route 
+              path="/dashboard" 
+              element={<ProtectedRoute component={Dashboard} />} 
+            />
           </Routes>
         </div>
       </Router>

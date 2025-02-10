@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiUser, FiGithub, FiEye, FiEyeOff } from 'react-icons/fi';
 import { FaGoogle, FaLinkedinIn } from 'react-icons/fa';
+import { getApiUrl } from '../config/api';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -15,7 +16,7 @@ const PageContainer = styled.div`
   position: fixed;
   inset: 0;
   width: 100%;
-  padding-top: 80px;
+  padding: 90px 0 20px;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -63,7 +64,7 @@ const RightSection = styled.div`
 const FormContainer = styled(motion.div)`
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 20px;
   width: 100%;
   max-width: 400px;
@@ -75,7 +76,7 @@ const FormContainer = styled(motion.div)`
 const Title = styled.h1`
   color: white;
   text-align: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
   font-size: 1.8rem;
   font-weight: 600;
 `;
@@ -83,18 +84,18 @@ const Title = styled.h1`
 const Subtitle = styled.p`
   color: rgba(255, 255, 255, 0.7);
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   font-size: 0.85rem;
 `;
 
 const InputGroup = styled.div`
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.8rem 1.2rem;
+  padding: 0.7rem 1.2rem;
   padding-right: ${props => props.type === 'password' ? '2.5rem' : '1.2rem'};
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -136,7 +137,7 @@ const PasswordToggle = styled.button`
 
 const SignUpButton = styled(motion.button)`
   width: 100%;
-  padding: 0.8rem;
+  padding: 0.7rem;
   background: linear-gradient(45deg, #2A0845, #6c63ff);
   border: none;
   border-radius: 10px;
@@ -150,7 +151,7 @@ const SignUpButton = styled(motion.button)`
 const TermsText = styled.p`
   color: rgba(255, 255, 255, 0.7);
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 0.8rem;
   font-size: 0.75rem;
   
   a {
@@ -166,7 +167,7 @@ const TermsText = styled.p`
 const BottomText = styled.p`
   color: white;
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 0.8rem;
   font-size: 0.85rem;
 
   a {
@@ -181,74 +182,307 @@ const BottomText = styled.p`
   }
 `;
 
+const EmailVerificationContainer = styled.div`
+  margin: 1rem 0;
+`;
+
+const VerifyEmailButton = styled(motion.button)`
+  width: 100%;
+  padding: 0.8rem;
+  background: rgba(108, 99, 255, 0.2);
+  border: 1px solid #6C63FF;
+  border-radius: 10px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:hover {
+    background: rgba(108, 99, 255, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const VerifyEmailSection = styled.div`
+  margin: 0.8rem 0;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  .pe_verify_email button {
+    width: 100% !important;
+    padding: 0.7rem !important;
+    background: linear-gradient(45deg, #2A0845, #6c63ff) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: white !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: transform 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    margin: 0 auto !important;
+  }
+
+  .pe_verify_email button:hover {
+    transform: scale(1.02) !important;
+    background: linear-gradient(45deg, #3a0b5e, #7c74ff) !important;
+  }
+
+  .pe_verify_email button:active {
+    transform: scale(0.98) !important;
+  }
+
+  .pe_verify_email button img {
+    display: none !important;
+  }
+`;
+
+const EmailVerifyText = styled.p`
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+  text-align: center;
+`;
+
+const VerificationStatus = styled(motion.div)`
+  color: ${props => props.$isVerified ? '#4CAF50' : '#FFA726'};
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: ${props => props.$isVerified ? 'rgba(76, 175, 80, 0.1)' : 'transparent'};
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: ${props => props.$isVerified ? '1px solid rgba(76, 175, 80, 0.2)' : 'none'};
+`;
+
 const SignUp = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    rollNumber: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  useEffect(() => {
+    // Clear any existing phoneEmailReceiver
+    delete window.phoneEmailReceiver;
+
+    // Initialize Phone Email verification
+    const script = document.createElement('script');
+    script.src = 'https://www.phone.email/verify_email_v1.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    // Function to receive verified email JSON URL
+    window.phoneEmailReceiver = (userObj) => {
+      if (isVerifying) return; // Prevent multiple calls
+      setIsVerifying(true);
+      
+      const user_json_url = userObj.user_json_url;
+      
+      // Send email JSON URL to backend
+      const verifyEmail = async (url) => {
+        try {
+          const response = await fetch(getApiUrl('auth/verifyEmail'), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_json_url: url }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (data.email) {
+            setVerifiedEmail(data.email);
+            setIsEmailVerified(true);
+          }
+        } catch (error) {
+          console.error("Email verification error:", error);
+          if (error.message.includes('CONNECTION_REFUSED')) {
+            alert("Server is not running. Please try again later.");
+          } else {
+            alert("Failed to verify email. Please try again.");
+          }
+          setIsVerifying(false);
+        }
+      };
+
+      verifyEmail(user_json_url);
+    };
+
+    return () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+      delete window.phoneEmailReceiver;
+    };
+  }, [isVerifying]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!isEmailVerified) {
+      alert('Please verify your email first!');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await fetch(getApiUrl('auth/signup'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: verifiedEmail,
+          password: formData.password,
+          rollNumber: formData.rollNumber
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Account created successfully!');
+        navigate('/login');
+      } else {
+        alert(data.message || 'Failed to create account');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      alert('An error occurred while creating your account');
+    }
+  };
 
   return (
     <PageContainer>
       <LeftSection>
-        <FormContainer
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <FormContainer>
           <Title>Create Account</Title>
           <Subtitle>Join KIITWALLAH community today</Subtitle>
           
-          <InputGroup>
-            <Input type="text" placeholder="Full Name" />
-          </InputGroup>
-          <InputGroup>
-            <Input type="email" placeholder="Email" />
-          </InputGroup>
-          <InputGroup>
-            <Input type="text" placeholder="Roll Number" />
-          </InputGroup>
-          <InputGroup>
-            <Input 
-              type={showPassword ? "text" : "password"}
-              placeholder="Password" 
-            />
-            <PasswordToggle
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+          <form onSubmit={handleSubmit}>
+            <InputGroup>
+              <Input 
+                type="text" 
+                placeholder="Full Name" 
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                required 
+              />
+            </InputGroup>
+            <InputGroup>
+              <Input 
+                type="text" 
+                placeholder="Roll Number" 
+                value={formData.rollNumber}
+                onChange={(e) => setFormData({...formData, rollNumber: e.target.value})}
+                required 
+              />
+            </InputGroup>
+            <InputGroup>
+              <Input 
+                type={showPassword ? "text" : "password"}
+                placeholder="Password" 
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                required
+              />
+              <PasswordToggle
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </PasswordToggle>
+            </InputGroup>
+            <InputGroup>
+              <Input 
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm Password" 
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                required
+              />
+              <PasswordToggle
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </PasswordToggle>
+            </InputGroup>
+
+            <VerifyEmailSection>
+              <EmailVerifyText>
+                Verify your email address to continue
+              </EmailVerifyText>
+              <div 
+                className="pe_verify_email" 
+                data-client-id="11658316407910679845"
+              ></div>
+              {isEmailVerified && (
+                <VerificationStatus $isVerified={true}>
+                  Email verified successfully: {verifiedEmail}
+                </VerificationStatus>
+              )}
+            </VerifyEmailSection>
+
+            <SignUpButton
+              type="submit"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={!isEmailVerified}
+              style={{ opacity: isEmailVerified ? 1 : 0.7 }}
             >
-              {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-            </PasswordToggle>
-          </InputGroup>
-          <InputGroup>
-            <Input 
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password" 
-            />
-            <PasswordToggle
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-            >
-              {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-            </PasswordToggle>
-          </InputGroup>
+              Create Account
+            </SignUpButton>
 
-          <SignUpButton
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            Create Account
-          </SignUpButton>
+            <TermsText>
+              By signing up, you agree to our{' '}
+              <Link to="/terms">Terms of Service</Link> and{' '}
+              <Link to="/privacy">Privacy Policy</Link>
+            </TermsText>
 
-          <TermsText>
-            By signing up, you agree to our{' '}
-            <Link to="/terms">Terms of Service</Link> and{' '}
-            <Link to="/privacy">Privacy Policy</Link>
-          </TermsText>
-
-          <BottomText>
-            Already have an account?
-            <Link to="/login">Sign In</Link>
-          </BottomText>
+            <BottomText>
+              Already have an account?
+              <Link to="/login">Sign In</Link>
+            </BottomText>
+          </form>
         </FormContainer>
       </LeftSection>
       <RightSection />
