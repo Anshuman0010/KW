@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FiSearch, FiFilter, FiStar, FiClock, FiVideo } from 'react-icons/fi';
+import { getApiUrl } from '../config/api';
+import LoadingScreen from '../components/LoadingScreen';
+import PageTransition from '../components/PageTransition';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -89,12 +92,27 @@ const FilterButton = styled(motion.button)`
   cursor: pointer;
 `;
 
-const AlumniGrid = styled.div`
+const AlumniGrid = styled(motion.div)`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
   padding-bottom: 2rem;
 `;
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
 const AlumniCard = styled(motion.div)`
   background: rgba(255, 255, 255, 0.1);
@@ -169,79 +187,104 @@ const BookingButton = styled(motion.button)`
   cursor: pointer;
 `;
 
+const ErrorState = styled(LoadingScreen)`
+  color: #ff6b6b;
+`;
+
 const AlumniNexus = () => {
-  const alumniData = [
-    {
-      name: "Sarah Johnson",
-      title: "Senior Software Engineer",
-      company: "Google",
-      avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-      rating: 4.9,
-      sessions: 124,
-      hourlyRate: "₹1,500"
-    },
-    // Add more alumni data...
-  ];
+  const [alumni, setAlumni] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAlumni = async () => {
+      try {
+        const response = await fetch(`${getApiUrl('alumni')}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch alumni');
+        }
+        const data = await response.json();
+        setAlumni(data);
+      } catch (error) {
+        console.error('Error fetching alumni:', error);
+        setError('Failed to load alumni. Please try again later.');
+      } finally {
+        setTimeout(() => setLoading(false), 1000);
+      }
+    };
+
+    fetchAlumni();
+  }, []);
+
+  if (error) {
+    return <ErrorState>{error}</ErrorState>;
+  }
 
   return (
-    <PageContainer>
-      <ContentWrapper>
-        <Header>
-          <Title>Alumni Nexus</Title>
-          <Subtitle>Connect with KIIT alumni for personalized 1:1 mentorship sessions</Subtitle>
-        </Header>
+    <PageTransition isLoading={loading}>
+      <LoadingScreen />
+      <PageContainer>
+        <ContentWrapper>
+          <Header>
+            <Title>Alumni Nexus</Title>
+            <Subtitle>Connect with KIIT alumni for personalized 1:1 mentorship sessions</Subtitle>
+          </Header>
 
-        <SearchSection>
-          <SearchBar>
-            <SearchInput placeholder="Search by name, role, or company..." />
-            <FilterButton whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <FiFilter />
-              Filters
-            </FilterButton>
-          </SearchBar>
-        </SearchSection>
+          <SearchSection>
+            <SearchBar>
+              <SearchInput placeholder="Search by name, role, or company..." />
+              <FilterButton whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <FiFilter />
+                Filters
+              </FilterButton>
+            </SearchBar>
+          </SearchSection>
 
-        <AlumniGrid>
-          {alumniData.map((alumni, index) => (
-            <AlumniCard
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <AlumniHeader>
-                <AlumniAvatar src={alumni.avatar} alt={alumni.name} />
-                <AlumniInfo>
-                  <AlumniName>{alumni.name}</AlumniName>
-                  <AlumniTitle>{alumni.title}</AlumniTitle>
-                  <AlumniCompany>{alumni.company}</AlumniCompany>
-                </AlumniInfo>
-              </AlumniHeader>
-              <AlumniStats>
-                <Stat>
-                  <FiStar />
-                  {alumni.rating}
-                </Stat>
-                <Stat>
-                  <FiClock />
-                  {alumni.sessions} sessions
-                </Stat>
-                <Stat>
-                  <FiVideo />
-                  {alumni.hourlyRate}/hr
-                </Stat>
-              </AlumniStats>
-              <BookingButton
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+          <AlumniGrid
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
+            {alumni.map((alum) => (
+              <AlumniCard
+                key={alum._id}
+                variants={item}
+                whileHover={{ y: -5 }}
               >
-                Book 1:1 Session
-              </BookingButton>
-            </AlumniCard>
-          ))}
-        </AlumniGrid>
-      </ContentWrapper>
-    </PageContainer>
+                <AlumniHeader>
+                  <AlumniAvatar src={alum.imageUrl} alt={alum.name} />
+                  <AlumniInfo>
+                    <AlumniName>{alum.name}</AlumniName>
+                    <AlumniTitle>{alum.title}</AlumniTitle>
+                    <AlumniCompany>{alum.company}</AlumniCompany>
+                  </AlumniInfo>
+                </AlumniHeader>
+                <AlumniStats>
+                  <Stat>
+                    <FiStar />
+                    {alum.rating.toFixed(1)}
+                  </Stat>
+                  <Stat>
+                    <FiClock />
+                    {alum.sessionsCompleted} sessions
+                  </Stat>
+                  <Stat>
+                    <FiVideo />
+                    ₹{alum.hourlyRate}/hr
+                  </Stat>
+                </AlumniStats>
+                <BookingButton
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Book 1:1 Session
+                </BookingButton>
+              </AlumniCard>
+            ))}
+          </AlumniGrid>
+        </ContentWrapper>
+      </PageContainer>
+    </PageTransition>
   );
 };
 

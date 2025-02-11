@@ -2,14 +2,15 @@ const isDevelopment = import.meta.env.MODE === 'development';
 
 const config = {
   development: {
-    serverUrl: 'https://kw-backend.onrender.com',
+    serverUrl: 'http://localhost:3001',
     apiPaths: {
       base: '/api',
+      alumni: '/alumni',
       auth: {
-        signup: '/signup',
-        login: '/login',
+        signup: '/auth/signup',
+        login: '/auth/login',
         logout: '/logout',
-        verifyEmail: '/verify-email'
+        verifyEmail: '/auth/verify-email'
       },
       user: {
         profile: '/profile'
@@ -20,11 +21,12 @@ const config = {
     serverUrl: 'https://kw-backend.onrender.com',
     apiPaths: {
       base: '/api',
+      alumni: '/alumni',
       auth: {
-        signup: '/signup',
-        login: '/login',
+        signup: '/auth/signup',
+        login: '/auth/login',
         logout: '/logout',
-        verifyEmail: '/verify-email'
+        verifyEmail: '/auth/verify-email'
       },
       user: {
         profile: '/profile'
@@ -36,11 +38,12 @@ const config = {
 const environment = config[isDevelopment ? 'development' : 'production'];
 
 export const getApiUrl = (path) => {
-  // Remove the /auth from the path parameter since it's already in apiPaths
-  const fullPath = path.startsWith('/') ? path.substring(1) : path;
-  const [section, endpoint] = fullPath.split('/');
+  if (typeof environment.apiPaths[path] === 'string') {
+    return `${environment.serverUrl}${environment.apiPaths.base}${environment.apiPaths[path]}`;
+  }
   
-  return `${environment.serverUrl}${environment.apiPaths.base}/${section}${environment.apiPaths[section][endpoint]}`;
+  const [section, endpoint] = path.split('/');
+  return `${environment.serverUrl}${environment.apiPaths.base}${environment.apiPaths[section][endpoint]}`;
 };
 
 export default environment; 
