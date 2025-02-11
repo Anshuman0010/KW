@@ -195,6 +195,8 @@ const AlumniNexus = () => {
   const [alumni, setAlumni] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredAlumni, setFilteredAlumni] = useState([]);
 
   useEffect(() => {
     const fetchAlumni = async () => {
@@ -205,6 +207,7 @@ const AlumniNexus = () => {
         }
         const data = await response.json();
         setAlumni(data);
+        setFilteredAlumni(data);
       } catch (error) {
         console.error('Error fetching alumni:', error);
         setError('Failed to load alumni. Please try again later.');
@@ -215,6 +218,25 @@ const AlumniNexus = () => {
 
     fetchAlumni();
   }, []);
+
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredAlumni(alumni);
+      return;
+    }
+
+    const searchTermLower = searchTerm.toLowerCase();
+    const filtered = alumni.filter(alum => 
+      alum.name.toLowerCase().includes(searchTermLower) ||
+      alum.title.toLowerCase().includes(searchTermLower) ||
+      alum.company.toLowerCase().includes(searchTermLower)
+    );
+    setFilteredAlumni(filtered);
+  }, [searchTerm, alumni]);
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   if (error) {
     return <ErrorState>{error}</ErrorState>;
@@ -232,7 +254,11 @@ const AlumniNexus = () => {
 
           <SearchSection>
             <SearchBar>
-              <SearchInput placeholder="Search by name, role, or company..." />
+              <SearchInput 
+                placeholder="Search by name, role, or company..." 
+                value={searchTerm}
+                onChange={handleSearch}
+              />
               <FilterButton whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <FiFilter />
                 Filters
@@ -245,7 +271,7 @@ const AlumniNexus = () => {
             initial="hidden"
             animate="show"
           >
-            {alumni.map((alum) => (
+            {filteredAlumni.map((alum) => (
               <AlumniCard
                 key={alum._id}
                 variants={item}
